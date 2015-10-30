@@ -1,2 +1,5 @@
 # fast-gmm
-This is  Seungsu's impelemntation of GMM and I think GMR is also implemented!
+
+This package calculate GMM and GMR. The main advantage is the computational cost, Seungsu claims it!.
+
+
