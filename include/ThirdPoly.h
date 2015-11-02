@@ -8,7 +8,7 @@
 #ifndef THIRDPOLY_H_
 #define THIRDPOLY_H_
 
-#include "MathLib/MathLib.h"
+#include "MathLib.h"
 
 class ThirdPoly
 {

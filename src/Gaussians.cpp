@@ -28,6 +28,52 @@ Gaussians::Gaussians(GMMs *model)
 }
 */
 
+Gaussians::Gaussians(const char *f_mu, const char *f_sigma, const char *f_prio)
+{
+	int s, i, j;
+	int nbStates;
+	int nbDim;
+
+	Matrix fMatrix;
+	fMatrix.Load(f_prio);
+	if( fMatrix(0, fMatrix.ColumnSize()-1) > 0.0 )
+	{
+		nbStates = fMatrix.ColumnSize();
+	}
+	else
+	{
+		nbStates = fMatrix.ColumnSize()-1;
+	}
+
+	for( s=0; s<nbStates; s++ ){
+		model.States[s].Prio = fMatrix(0,s);
+	}
+
+	fMatrix.Load(f_mu);
+	nbDim = fMatrix.RowSize();
+	model.nbStates = nbStates;
+	model.nbDim    = nbDim;
+
+
+	for( s=0; s<nbStates; s++ ){
+		model.States[s].Mu.Resize(nbDim);
+		model.States[s].Sigma.Resize(nbDim, nbDim );
+	}
+
+	for( s=0; s<nbStates; s++ ){
+		model.States[s].Mu = fMatrix.GetColumn(s);
+	}
+
+	fMatrix.Load(f_sigma);
+	j = 0;
+	for( s=0; s<nbStates; s++ ){
+		for( i=0; i<nbDim; i++ ){
+			model.States[s].Sigma.SetRow(fMatrix.GetRow(j), i);
+			j++;
+		}
+	}
+}
+
 Gaussians::Gaussians(int nbStates, int nbDim, const char *f_mu, const char *f_sigma, const char *f_prio)
 {
 
@@ -68,7 +114,7 @@ Gaussians::Gaussians(int nbStates, int nbDim, const char *f_mu, const char *f_si
 
 void Gaussians::setGMMs(GMMs *model)
 {
-	for(int s=0; s<model->nbStates; s++ ){
+	for(unsigned int s=0; s<model->nbStates; s++ ){
 		this->model.States[s].Mu    = model->States[s].Mu;
 		this->model.States[s].Sigma = model->States[s].Sigma;
 		this->model.States[s].Prio  = model->States[s].Prio;
@@ -81,13 +127,13 @@ void Gaussians::InitFastGaussians(int first_inindex, int last_inindex)
 	double det;
 	int nbIN = last_inindex-first_inindex+1;
 
-	for(int s=0; s<model.nbStates; s++ ){
+	for(unsigned int s=0; s<model.nbStates; s++ ){
 		gmmpinv[s].MuI.Resize(nbIN);
 		gmmpinv[s].SigmaII.Resize(nbIN, nbIN);
 		gmmpinv[s].SigmaIIInv.Resize(nbIN, nbIN);
 	}
 
-	for(int s=0; s<model.nbStates; s++ ){
+	for(unsigned int s=0; s<model.nbStates; s++ ){
 		for( int i=first_inindex; i<=last_inindex; i++ ) gmmpinv[s].MuI(i-first_inindex) = model.States[s].Mu(i);
 		for( int i=first_inindex; i<=last_inindex; i++ )
 			for( int j=first_inindex; j<=last_inindex; j++ )
@@ -122,7 +168,7 @@ double Gaussians::GaussianPDFFast(int state, Vector x)
 double Gaussians::GaussianProbFast(Vector x)
 {
 	double totalP=0;
-	for(int s=0; s<model.nbStates; s++ ){
+	for(unsigned int s=0; s<model.nbStates; s++ ){
 		totalP += model.States[s].Prio*GaussianPDFFast(s,x);
 	}
 	return totalP;
@@ -131,7 +177,7 @@ double Gaussians::GaussianProbFast(Vector x)
 Vector Gaussians::GaussianDerProbFast(Vector x)
 {
 	gDer.Zero();
-	for(int s=0; s<model.nbStates; s++ ){
+	for(unsigned int s=0; s<model.nbStates; s++ ){
 		gDer += (gmmpinv[s].SigmaIIInv *(x-gmmpinv[s].MuI))*model.States[s].Prio*GaussianPDFFast(s,x);
 	}
 	return -gDer;
@@ -145,7 +191,7 @@ void Gaussians::InitFastGMR(int first_inindex, int last_inindex, int first_outin
 
 	gPdf.Resize(model.nbStates);
 
-	for(int s=0; s<model.nbStates; s++ ){
+	for(unsigned int s=0; s<model.nbStates; s++ ){
 		gmmpinv[s].MuI.Resize(nbIN);
 		gmmpinv[s].SigmaII.Resize(nbIN, nbIN);
 		gmmpinv[s].SigmaIIInv.Resize(nbIN, nbIN);
@@ -155,7 +201,7 @@ void Gaussians::InitFastGMR(int first_inindex, int last_inindex, int first_outin
 		gmmpinv[s].SigmaIOInv.Resize(nbOUT, nbOUT);
 	}
 
-	for(int s=0; s<model.nbStates; s++ ){
+	for(unsigned int s=0; s<model.nbStates; s++ ){
 		for( int i=first_inindex; i<=last_inindex; i++ ){
 			gmmpinv[s].MuI(i-first_inindex) = model.States[s].Mu(i);
 

@@ -35,8 +35,8 @@ void GMRDynamics::initGMR(int first_inindex, int last_inindex, int first_outinde
 
 void GMRDynamics::setStateTarget(Vector state, Vector target)
 {
-	setState(state);
 	setTarget(target);
+	setState(state);
 }
 
 void GMRDynamics::setTarget(Vector target, double target_t)

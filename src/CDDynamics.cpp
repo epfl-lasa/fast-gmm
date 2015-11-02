@@ -46,17 +46,23 @@ CDDynamics::CDDynamics(int dim, double dt, double Wn)
 	mTargetVelocity.Resize(mDim);
 	mState.Resize(mDim);
 	mStateVelocity.Resize(mDim);
+	mStateAccel.Resize(mDim);
+
 	mPositionLimits.Resize(mDim);
 	mVelocityLimits.Resize(mDim);
+	mAccelLimits.Resize(mDim);
 
 	// set initial values
 	mState.Zero();
 	mStateVelocity.Zero();
+	mStateAccel.Zero();
+
 	mTarget.Zero();
 	mTargetVelocity.Zero();
 
 	mPositionLimits.Zero();
 	mVelocityLimits.Zero();
+	mAccelLimits.Zero();
 
 	mReachingTime = 0.0;
 }
@@ -90,6 +96,15 @@ void CDDynamics::SetTarget(const Vector & target)
 	}
 	else{
 		cout<<"Dimension error! @ CDDynamics::SetTarget() "<<endl;
+	}
+}
+
+void CDDynamics::SetTarget(double target[])
+{
+	for(int i=0; i<mDim; i++)
+	{
+		mState[i] += (mTarget[i]-target[i]);
+		mTarget[i] = target[i];
 	}
 }
 
@@ -131,6 +146,31 @@ void CDDynamics::SetWn(double Wn)
 {
 	mWn = Wn;
 }
+void CDDynamics::SetAccelLimits(const Vector & accelLimits)
+{
+	if(mDim == accelLimits.Size()){
+		mAccelLimits = accelLimits;
+	}
+	else{
+		cout<<"Dimension error! @ CDDynamics::SetAccelLimits() "<<endl;
+	}
+}
+
+void CDDynamics::RemoveAccelLimits(void)
+{
+	mAccelLimits.Zero();
+}
+
+double CDDynamics::GetAccelLimits(unsigned int index)
+{
+	if( index < mDim ){
+		return mAccelLimits(index);
+	}
+	else{
+		return 0.0;
+	}
+}
+
 
 void CDDynamics::SetVelocityLimits(const Vector & velLimits)
 {
@@ -145,6 +185,16 @@ void CDDynamics::SetVelocityLimits(const Vector & velLimits)
 void CDDynamics::RemoveVelocityLimits(void)
 {
 	mVelocityLimits.Zero();
+}
+
+double CDDynamics::GetVelocityLimits(unsigned int index)
+{
+	if( index < mDim ){
+		return mVelocityLimits(index);
+	}
+	else{
+		return 0.0;
+	}
 }
 
 void CDDynamics::SetPositionLimits(const Vector & posLimits)
@@ -178,11 +228,25 @@ void CDDynamics::GetState(Vector & Position)
 	Position = mState + mTarget;
 }
 
+void CDDynamics::GetState(double *Position)
+{
+	for(int i=0; i<mDim; i++)
+	{
+		Position[i] = mState[i] + mTarget[i];
+	}
+}
+
 void CDDynamics::GetState(Vector & Position, Vector & Velocity)
 {
 	Position = mState + mTarget;
 	Velocity = mStateVelocity + mTargetVelocity;
 }
+
+void CDDynamics::GetStateAccel(Vector & Accel)
+{
+	Accel = mStateAccel;
+}
+
 
 void CDDynamics::Update()
 {
@@ -201,16 +265,19 @@ void CDDynamics::Update(double dt, double muxVel)
 	// x(t)   = (A+Bt)e^(-w*t)
 	// x_d(t) = (-w*A+(1-w*t)B ) e^(-w*t)
 
-	MathLib::Vector lA(mDim);
-	MathLib::Vector lB(mDim);
-
 	double lWn = mWn*muxVel;
 
-	lA = mState;
-	lB = mStateVelocity+ mState * lWn;
+	mStateAccel    =  mState*(-lWn*lWn) + mStateVelocity *(-2.0*lWn);
 
-	mState         = mState + mStateVelocity*dt;
-	mStateVelocity = (mState*(-lWn) + lB*(1.0-lWn*dt) )* (exp(-lWn*dt));
+	for(unsigned int i=0; i<mDim; i++ ){
+		if( mAccelLimits(i)>0.0){
+			if     ( mStateAccel(i) >  mAccelLimits(i) ) mStateAccel(i) =  mAccelLimits(i);
+			else if( mStateAccel(i) < -mAccelLimits(i) ) mStateAccel(i) = -mAccelLimits(i);
+		}
+	}
+
+	mState         += mStateVelocity*dt + mStateAccel*dt*dt*0.5;
+	mStateVelocity += mStateAccel*dt;
 
 	for(unsigned int i=0; i<mDim; i++ ){
 		if( mVelocityLimits(i)>0){
@@ -218,6 +285,8 @@ void CDDynamics::Update(double dt, double muxVel)
 			else if( mStateVelocity(i) < -mVelocityLimits(i) ) mStateVelocity(i) = -mVelocityLimits(i);
 		}
 	}
+
+
 	mReachingTime -= dt;
 }
 
@@ -226,9 +295,10 @@ double CDDynamics::GetReachingTime(double dt, double muxVel)
 {
 	MathLib::Vector lState(mDim);
 	MathLib::Vector lStateVelocity(mDim);
+	MathLib::Vector lStateAccel(mDim);
 	MathLib::Vector lX(mDim);
 	MathLib::Vector lB(mDim);
-	unsigned int frame,i;
+	unsigned int frame;
 	double lWn;
 
 	lState = mState;
@@ -236,19 +306,24 @@ double CDDynamics::GetReachingTime(double dt, double muxVel)
 
 	lWn = mWn*muxVel;
 	for(frame=0; frame<500; frame++){
-		lX = lState;
-		lB = lStateVelocity+ lState* lWn;
+		lStateAccel    = lState*(-lWn*lWn) + lStateVelocity *(-2.0*lWn);
+		for(unsigned int i=0; i<mDim; i++ ){
+			if( mAccelLimits(i)>0.0){
+				if     ( lStateAccel(i) >  mAccelLimits(i) ) lStateAccel(i) =  mAccelLimits(i);
+				else if( lStateAccel(i) < -mAccelLimits(i) ) lStateAccel(i) = -mAccelLimits(i);
+			}
+		}
 
-		lState         =  lState + lStateVelocity*dt;
-		lStateVelocity = (lState*(-lWn) + lB*(1.0-lWn*dt) )* (exp(-lWn*dt));
+		lState         += lStateVelocity*dt;
+		lStateVelocity += lStateAccel*dt;
 
-
-		for(i=0; i<mDim; i++ ){
+		for(unsigned int i=0; i<mDim; i++ ){
 			if( mVelocityLimits(i)>0){
 				if     ( lStateVelocity(i) >  mVelocityLimits(i) ) lStateVelocity(i) =  mVelocityLimits(i);
 				else if( lStateVelocity(i) < -mVelocityLimits(i) ) lStateVelocity(i) = -mVelocityLimits(i);
 			}
 		}
+
 		if( lState.Norm() < 0.001 ){
 			return (double)frame*dt;
 		}

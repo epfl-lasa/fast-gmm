@@ -10,7 +10,7 @@
 
 #include "MathLib.h"
 
-#define GAUSSIAN_MAXIMUM_NUMBER 20
+#define GAUSSIAN_MAXIMUM_NUMBER 50
 
 using namespace MathLib;
 
@@ -44,10 +44,10 @@ class Gaussians
 private: 
 	GMMStateP gmmpinv[GAUSSIAN_MAXIMUM_NUMBER];
 
-
 public:
 	GMMs model;
 
+	Gaussians(const char *f_mu, const char *f_sigma, const char *f_prio);
 	Gaussians(int nbStates, int nbDim, const char *f_mu, const char *f_sigma, const char *f_prio);
 	Gaussians(GMMs *model);	
 

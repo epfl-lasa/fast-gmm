@@ -27,14 +27,14 @@ ThirdPoly::ThirdPoly(int dim)
 
 void ThirdPoly::SetConstraints(MathLib::Vector &initPos, MathLib::Vector &initVel, MathLib::Vector &endPos, MathLib::Vector &endVel, double duration)
 {
-	mInitPos.Set(initPos);
-	mInitVel.Set(initVel);
-	mEndPos.Set(endPos);
-	mEndVel.Set(endVel);
+	mInitPos.Set(initPos.Array(), mDim);
+	mInitVel.Set(initVel.Array(), mDim);
+	mEndPos.Set(endPos.Array(), mDim);
+	mEndVel.Set(endVel.Array(), mDim);
 
 	// calculate polynomial
-	mParamA = mInitPos*( 2.0) +mEndPos*(-2.0) +mInitVel       +mEndVel;
-	mParamB = mInitPos*(-3.0) +mEndPos*( 3.0) +mInitVel*(-2.0)-mEndVel;
+	mParamA = mInitPos*( 2.0) +mEndPos*(-2.0) +mInitVel        +mEndVel;
+	mParamB = mInitPos*(-3.0) +mEndPos*( 3.0) +mInitVel*(-2.0) -mEndVel;
 	mParamC = mInitVel;
 	mParamD = mInitPos;
 

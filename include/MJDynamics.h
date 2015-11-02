@@ -1,55 +1,55 @@
 /*
- * CDDynamics.h
- * Critical Damped 2nd order Dynamics
+ * MJDynamics.h
  *
- *  Created on: May 29, 2012
- *      Author: Seungsu KIM
+ *  Created on: May 15, 2013
+ *      Author: seungsu
  */
 
-#ifndef CDDYNAMICS_H_
-#define CDDYNAMICS_H_
-
+#ifndef MZDYNAMICS_H_
+#define MZDYNAMICS_H_
 
 #include "MathLib.h"
 
-#ifdef USE_MATHLIB_NAMESPACE
 using namespace MathLib;
-#endif
 
-class CDDynamics
+class MJDynamics
 {
 private :
 	Vector mTarget;
-	Vector mTargetVelocity;
 
 	Vector mState;
 	Vector mStateVelocity;
 	Vector mStateAccel;
+	Vector mStateZerk;
 
-	Vector mPositionLimits;
+	Vector mPositionLimitsUp;
+	Vector mPositionLimitsDn;
 	Vector mVelocityLimits;
 	Vector mAccelLimits;
+	Vector mZerkLimits;
+
+	Vector a0, a1, a2, a3, a4, a5;
 
 	unsigned int mDim;
-	double mWn;
 	double mDT;
 
 	double mReachingTime;
-
+	double mCurrentTime;
 public :
 
-	CDDynamics(int dim, double dt, double Wn);
+	MJDynamics(int dim, double dt);
 
 	void SetState(const Vector & Position);
 	void SetState(const Vector & Position, const Vector & Velocity);
 	void SetTarget(const Vector & target);
-	void SetTarget(double target[]);
 	void SetTarget(const Vector & target, double ReachingTime);
 	void SetStateTarget(const Vector & Position, const Vector & Target);
-	//void SetTarget(const Vector & target, const Vector & targetVel);
 
 	void SetDt(double dt);
-	void SetWn(double Wn);
+
+	void SetZerkLimits(const Vector & velLimits);
+	void RemoveZerkLimits(void);
+	double GetZerkLimits(unsigned int index);
 
 	void SetAccelLimits(const Vector & velLimits);
 	void RemoveAccelLimits(void);
@@ -59,25 +59,19 @@ public :
 	void RemoveVelocityLimits(void);
 	double GetVelocityLimits(unsigned int index);
 
-	void SetPositionLimits(const Vector & posLimits);
+	void SetPositionLimits(const Vector & posLimitsUp, const Vector & posLimitsDn);
 	void RemovePositionLimits(void);
 
-
 	void GetTarget(Vector & target);
-	//void GetTarget(Vector & target, Vector & targetVel);
 
 	void GetState(Vector & Position);
-	void GetState(double *Position);
 	void GetState(Vector & Position, Vector & Velocity);
 	void GetStateAccel(Vector & Accel);
 
 	void Update();
 	void Update(double dt);
-	void Update(double dt, double muxVel);
 
-	double GetReachingTime(double dt, double muxVel);
-	double GetTargetTime(void);
+	double GetReachingTime(void);
 };
 
-
-#endif /* CDDYNAMICS_H_ */
+#endif /* MZDYNAMICS_H_ */
