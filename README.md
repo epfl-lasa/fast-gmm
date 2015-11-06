@@ -25,7 +25,7 @@ How to use CDD-dynamics:
 
 How to use GMM:  
 
-
+	Gaussians *GMM;
 	GMM = new Gaussians(K, Dimention,"mu.txt","sigma.txt","prio.txt");  
 	GMM->InitFastGaussians(0, 2); // I have no idea what is it!  
 	start loop  
