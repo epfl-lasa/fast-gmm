@@ -26,9 +26,9 @@ How to use CDD-dynamics:
 How to use GMM:  
 
 
-GMM = new Gaussians(K, Dimention,"mu.txt","sigma.txt","prio.txt");  
+	GMM = new Gaussians(K, Dimention,"mu.txt","sigma.txt","prio.txt");  
 	GMM->InitFastGaussians(0, 2); // I have no idea what is it!  
-start loop  
-Likelihood=GMM->GaussianProbFast(P)// P is a vector3  
-end loop  
+	start loop  
+		Likelihood=GMM->GaussianProbFast(P)// P is a vector3  
+	end loop  
 
