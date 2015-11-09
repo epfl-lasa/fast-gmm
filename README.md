@@ -1,7 +1,7 @@
 # fast-gmm
 
 This package is an unofficial Seungsu's implementation of motion_generators package.   
-There are several advantages of this package over the motion_generators package. First: It calculates GMM, GMR faster.   Second: CDD-dynamics is a second order system (You can set a limits on acceleration)
+There are several advantages of this package over the motion_generators package. First: It calculates GMM, GMR faster.   Second: CDD-dynamics is a second order system (You can set a limit on acceleration)
 
 
 How to use CDD-dynamics:  
