@@ -112,6 +112,70 @@ Gaussians::Gaussians(int nbStates, int nbDim, const char *f_mu, const char *f_si
 
 }
 
+Gaussians::Gaussians(const int nbStates, const int nbDim, const vector<double> pri_vec, const vector<double> mu_vec, const vector<double> sig_vec) {
+
+	model.nbStates = nbStates;
+	model.nbDim    = nbDim;
+
+	for ( int s = 0; s < nbStates; s++ ) {
+		model.States[s].Mu.Resize(nbDim);
+		model.States[s].Sigma.Resize(nbDim, nbDim );
+	}
+
+	for ( int s = 0; s < nbStates; s++ ) {
+		model.States[s].Prio = pri_vec[s];
+	}
+	// cout << endl << "Printing the constructed Priors" << endl;
+	// for ( int s = 0; s < nbStates; s++ ) {
+	// 	cout << model.States[s].Prio  << "\t";
+	// }
+	// cout << endl;
+
+
+	for ( int s = 0; s < nbStates; s++ ) {
+		for (int d = 0; d < nbDim; d++) {
+			model.States[s].Mu[d] = mu_vec[s * nbDim + d];
+		}
+	}
+
+
+	// cout << endl << "Printing the constructed Mu" << endl;
+	// for ( int s = 0; s < nbStates; s++ ) {
+	// 	for (int d = 0; d < nbDim; d++) {
+	// 		cout << model.States[s].Mu[d]  << "\t";
+	// 	}
+	// 	cout << endl;
+	// }
+
+	for ( int s = 0; s < nbStates; s++ ) {
+		for (int row = 0; row < nbDim; row++) {
+			for (int col = 0; col < nbDim; col++) {
+				int ind = s * nbDim * nbDim + row * nbDim + col;
+				model.States[s].Sigma(row, col) = sig_vec[ind];
+			}
+		}
+	}
+
+
+	// cout << endl << "Printing the constructed Sigma" << endl;
+	// for ( int s = 0; s < nbStates; s++ ) {
+	// 	for (int row = 0; row < nbDim; row++) {
+	// 		for (int col = 0; col < nbDim; col++) {
+	// 			cout << model.States[s].Sigma(row, col) << "\t";
+	// 		}
+	// 		cout <<endl;
+	// 	}
+	// 	cout << endl;
+	// }
+
+
+
+
+}
+
+
+
+
 void Gaussians::setGMMs(GMMs *model)
 {
 	for (unsigned int s = 0; s < model->nbStates; s++ ) {

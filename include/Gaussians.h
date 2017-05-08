@@ -49,7 +49,8 @@ public:
 
 	Gaussians(const char *f_mu, const char *f_sigma, const char *f_prio);
 	Gaussians(int nbStates, int nbDim, const char *f_mu, const char *f_sigma, const char *f_prio);
-	Gaussians(GMMs *model);	
+	Gaussians(const int nbStates, const int nbDim, const vector<double> pri_vec, const vector<double> mu_vec, const vector<double> sig_vec);
+	Gaussians(GMMs *model);
 
 	void setGMMs(GMMs *model);
 

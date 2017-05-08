@@ -17,6 +17,13 @@ GMRDynamics::GMRDynamics(int nStates, int nVar, double delta_t, const char *f_mu
 	GMM = new Gaussians(nStates, nVar, f_mu, f_sigma, f_prio);
 }
 
+GMRDynamics::GMRDynamics(int nStates, int nVar, double delta_t, const vector<double> pri_vec, const vector<double> mu_vec, const vector<double> sig_vec)
+{
+	this->delta_t = delta_t;
+	GMM = new Gaussians(nStates, nVar, pri_vec, mu_vec, sig_vec);
+}
+
+
 void GMRDynamics::initGMR(int first_inindex, int last_inindex, int first_outindex, int last_outindex)
 {
 	GMM->InitFastGMR(first_inindex, last_inindex, first_outindex, last_outindex);

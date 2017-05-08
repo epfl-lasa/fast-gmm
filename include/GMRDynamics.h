@@ -31,6 +31,7 @@ private:
 
 public:
 	GMRDynamics(int nStates, int nVar, double delta_t, const char *f_mu, const char *f_sigma, const char *f_prio );
+	GMRDynamics(int nStates, int nVar, double delta_t, const vector<double> pri_vec, const vector<double> mu_vec, const vector<double> sig_vec);
 
 	void initGMR(int first_inindex, int last_inindex, int first_outindex, int last_outindex);
 
