@@ -30,9 +30,5 @@ Usage (GMM):
 		Likelihood=GMM->GaussianProbFast(P)// P is a vector
 	end loop  
 ```
-Usage (GMR):
-```
- 	TODO
-```
 
 **NOTES:** This package also includes an implementation of SVR evaluation function and 3rd order polynomial trajectory generation. These might be useful for someone and in my opinion don't belong here. - Nadia
