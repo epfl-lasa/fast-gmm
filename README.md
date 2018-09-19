@@ -1,7 +1,7 @@
 # fast-gmm
 
 This package includes two components:
-1. An implementation of ```CDDynamics```, as second order system which you can use to filter or generate smooth trajectories with the capability of setting a acceleration limits.  
+1. An implementation of ```CDDynamics```, a second order system which you can use to filter or generate smooth trajectories with the capability of setting a acceleration limits.  
 Usage:  
 ```
 	CDDynamics *testDyn;  
