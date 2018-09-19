@@ -34,3 +34,5 @@ Usage (GMR):
 ```
  	TODO
 ```
+
+NOTES: This package also includes an implementation of SVR evaluation function and generation of 3rd order polynomials. This might be useful to someone and in my opinion don't belong here. - Nadia
