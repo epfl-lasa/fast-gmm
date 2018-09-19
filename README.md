@@ -35,4 +35,4 @@ Usage (GMR):
  	TODO
 ```
 
-**NOTES:** This package also includes an implementation of SVR evaluation function and generation of 3rd order polynomials. This might be useful to someone and in my opinion don't belong here. - Nadia
+**NOTES:** This package also includes an implementation of SVR evaluation function and 3rd order polynomial trajectory generation. These might be useful for someone and in my opinion don't belong here. - Nadia
