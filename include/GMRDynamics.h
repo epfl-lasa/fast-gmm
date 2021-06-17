@@ -35,7 +35,7 @@ public:
 	void initGMR(int first_inindex, int last_inindex, int first_outindex, int last_outindex);
 
 	void   setStateTarget(Vector state, Vector target);
-	void   setTarget(Vector target, double target_t= -1.0);
+	void   setTarget(Vector target, double target_t = -1.0);
 	Vector getTarget(void);
 	double getTargetT(void);
 	void   setState(Vector state);
