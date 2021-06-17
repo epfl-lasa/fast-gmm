@@ -5,8 +5,8 @@
  *      Author: Kim Seungsu
  */
 #include <stdio.h>
-#include "GMRDynamics.h"
-#include "MJDynamics.h"
+#include "fast_gmm/GMRDynamics.h"
+#include "fast_gmm/MJDynamics.h"
 
 GMRDynamics *GMR_ready;
 Gaussians *GMR_dir;

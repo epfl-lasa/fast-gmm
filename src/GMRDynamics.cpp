@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "GMRDynamics.h"
+#include "fast_gmm/GMRDynamics.h"
 
 
 GMRDynamics::GMRDynamics(int nStates, int nVar, double delta_t, const char *f_mu, const char *f_sigma, const char *f_prio )

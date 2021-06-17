@@ -9,7 +9,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "Gaussians.h"
+#include "fast_gmm/Gaussians.h"
 
 using namespace std;
 /*

@@ -4,7 +4,7 @@
 #include <math.h>
 #include <fstream>
 
-#include "SVR.h"
+#include "fast_gmm/SVR.h"
 
 SVR::SVR(char *f_svrmodel)
 {

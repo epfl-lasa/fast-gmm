@@ -5,7 +5,7 @@
  *      Author: seungsu
  */
 
-#include "ThirdPoly.h"
+#include "fast_gmm/ThirdPoly.h"
 
 
 

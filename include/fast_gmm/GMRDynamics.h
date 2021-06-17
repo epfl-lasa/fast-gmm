@@ -8,7 +8,7 @@
 #ifndef __GMRDYNAMICS_H__
 #define __GMRDYNAMICS_H__
 
-#include "Gaussians.h"
+#include "fast_gmm/Gaussians.h"
 
 #define GMR_ERROR_TOLERANCE 0.001
 #define INTEGRATION_L 5

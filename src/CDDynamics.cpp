@@ -28,7 +28,7 @@
 	end loop
  */
 
-#include "CDDynamics.h"
+#include "fast_gmm/CDDynamics.h"
 
 #ifdef USE_MATHLIB_NAMESPACE
 using namespace MathLib;

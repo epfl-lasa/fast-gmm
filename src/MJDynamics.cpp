@@ -5,7 +5,7 @@
  *      Author: seungsu
  */
 
-#include "MJDynamics.h"
+#include "fast_gmm/MJDynamics.h"
 
 using namespace MathLib;
 

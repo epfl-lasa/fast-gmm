@@ -1,8 +1,11 @@
 # fast-gmm
 
 This package includes two components:
-1. An implementation of ```CDDynamics```, a second order system which you can use to filter or generate smooth trajectories with the capability of setting a acceleration limits.  
-Usage:  
+
+1. An implementation of ```CDDynamics```, a second order system which you can use to filter or generate smooth
+   trajectories with the capability of setting a acceleration limits.  
+   Usage:
+
 ```
 	CDDynamics *testDyn;  
 	testDyn = new CDDynamics(dim, dt, wn);  
@@ -21,7 +24,8 @@ Usage:
 ```
 
 2. A fast implementation of sampling from GMM/GMR evaluation functions. Used for se-DS and lpv-DS motion generators.
-Usage (GMM):
+   Usage (GMM):
+
 ```
 	Gaussians *GMM;
 	GMM = new Gaussians(K, Dimention,"mu.txt","sigma.txt","prio.txt");  
@@ -31,4 +35,17 @@ Usage (GMM):
 	end loop  
 ```
 
-**NOTES:** This package also includes an implementation of SVR evaluation function and 3rd order polynomial trajectory generation. These might be useful for someone and in my opinion don't belong here. - Nadia
+**NOTES:** This package also includes an implementation of SVR evaluation function and 3rd order polynomial trajectory
+generation. These might be useful for someone and in my opinion don't belong here. - Nadia
+
+## Installation
+
+This library depends on [mathlib](https://github.com/epfl-lasa/mathlib/tree/agnostic), make sure you have this library installed. Then, run
+```bash
+git clone -b agnostic --single-branch https://github.com/epfl-lasa/fast-gmm.git \
+  && mkdir -p fast-gmm/build \
+  && cd fast-gmm/build \
+  && cmake -DCMAKE_BUILD_TYPE=Release .. \
+  && make -j \
+  && make install
+```
