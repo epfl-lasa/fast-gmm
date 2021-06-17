@@ -21,8 +21,8 @@ void GMRDynamics::initGMR(int first_inindex, int last_inindex, int first_outinde
 {
 	GMM->InitFastGMR(first_inindex, last_inindex, first_outindex, last_outindex);
 
-	gDim = last_inindex- first_inindex+1;
-	if( gDim != ( last_outindex - first_outindex+1 ) ){
+	gDim = last_inindex - first_inindex + 1;
+	if ( gDim != ( last_outindex - first_outindex + 1 ) ) {
 		cout << "dynamics dimension is not matching" << endl;
 	}
 
@@ -69,12 +69,12 @@ Vector GMRDynamics::getState(void)
 
 void GMRDynamics::setCurrentTime(double current_t)
 {
-    this->current_t = current_t;
+	this->current_t = current_t;
 }
 
 double GMRDynamics::getCurrentTime(void)
 {
-    return current_t;
+	return current_t;
 }
 
 Vector GMRDynamics::getVelocity(Vector x)
@@ -93,27 +93,27 @@ Vector GMRDynamics::getNextState(double lamda)
 	// target time
 	target_t -= (delta_t*lamda);
 
-	gXi += (getVelocity(gXi-target) *(delta_t*lamda));
+	gXi += (getVelocity(gXi - target) * (delta_t*lamda));
 
 	return gXi;
 }
 
 double GMRDynamics::getReachingTime(double lamda)
 {
-	unsigned int frame=0;
-	unsigned int li=0;
+	unsigned int frame = 0;
+	unsigned int li = 0;
 	Vector xi(3);
 	xi.Set(gXi);
 
-	for(frame=0; frame<REACHING_ITERATION_MAX; frame++){
-		for(li=0; li<INTEGRATION_L; li++){
-			xi += getVelocity(xi-target)*delta_t/(double)INTEGRATION_L*lamda;
+	for (frame = 0; frame < REACHING_ITERATION_MAX; frame++) {
+		for (li = 0; li < INTEGRATION_L; li++) {
+			xi += getVelocity(xi - target) * delta_t / (double)INTEGRATION_L * lamda;
 
-			if( (xi-target).Norm() < GMR_ERROR_TOLERANCE ){
-				return (double)(frame*INTEGRATION_L +li)*delta_t/(double)INTEGRATION_L;
+			if ( (xi - target).Norm() < GMR_ERROR_TOLERANCE ) {
+				return (double)(frame * INTEGRATION_L + li) * delta_t / (double)INTEGRATION_L;
 			}
 		}
 	}
-	return (double)(frame*INTEGRATION_L +li)*delta_t/(double)INTEGRATION_L;
+	return (double)(frame * INTEGRATION_L + li) * delta_t / (double)INTEGRATION_L;
 }
 

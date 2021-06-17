@@ -32,7 +32,7 @@ struct GMMStateP {
 	Matrix SigmaIOInv;
 };
 
-struct GMMs{
+struct GMMs {
 	unsigned int nbStates;
 	unsigned int nbDim;
 
@@ -41,7 +41,7 @@ struct GMMs{
 
 class Gaussians
 {
-private: 
+private:
 	GMMStateP gmmpinv[GAUSSIAN_MAXIMUM_NUMBER];
 
 public:
