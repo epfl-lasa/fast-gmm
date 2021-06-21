@@ -5,73 +5,70 @@
  *      Author: seungsu
  */
 
-#ifndef MZDYNAMICS_H_
-#define MZDYNAMICS_H_
+#pragma once
 
-#include "MathLib.h"
+#include <eigen3/Eigen/Core>
 
-using namespace MathLib;
+namespace fast_gmm {
 
-class MJDynamics
-{
+class MJDynamics {
 private :
-	Vector mTarget;
+  Eigen::VectorXd mTarget;
 
-	Vector mState;
-	Vector mStateVelocity;
-	Vector mStateAccel;
-	Vector mStateZerk;
+  Eigen::VectorXd mState;
+  Eigen::VectorXd mStateVelocity;
+  Eigen::VectorXd mStateAccel;
+  Eigen::VectorXd mStateZerk;
 
-	Vector mPositionLimitsUp;
-	Vector mPositionLimitsDn;
-	Vector mVelocityLimits;
-	Vector mAccelLimits;
-	Vector mZerkLimits;
+  Eigen::VectorXd mPositionLimitsUp;
+  Eigen::VectorXd mPositionLimitsDn;
+  Eigen::VectorXd mVelocityLimits;
+  Eigen::VectorXd mAccelLimits;
+  Eigen::VectorXd mZerkLimits;
 
-	Vector a0, a1, a2, a3, a4, a5;
+  Eigen::VectorXd a0, a1, a2, a3, a4, a5;
 
-	unsigned int mDim;
-	double mDT;
+  unsigned int mDim;
+  double mDT;
 
-	double mReachingTime;
-	double mCurrentTime;
+  double mReachingTime;
+  double mCurrentTime;
 public :
 
-	MJDynamics(int dim, double dt);
+  MJDynamics(int dim, double dt);
 
-	void SetState(const Vector & Position);
-	void SetState(const Vector & Position, const Vector & Velocity);
-	void SetTarget(const Vector & target);
-	void SetTarget(const Vector & target, double ReachingTime);
-	void SetStateTarget(const Vector & Position, const Vector & Target);
+  void SetState(const Eigen::VectorXd& Position);
+  void SetState(const Eigen::VectorXd& Position, const Eigen::VectorXd& Velocity);
+  void SetTarget(const Eigen::VectorXd& target);
+  void SetTarget(const Eigen::VectorXd& target, double ReachingTime);
+  void SetStateTarget(const Eigen::VectorXd& Position, const Eigen::VectorXd& Target);
 
-	void SetDt(double dt);
+  void SetDt(double dt);
 
-	void SetZerkLimits(const Vector & velLimits);
-	void RemoveZerkLimits(void);
-	double GetZerkLimits(unsigned int index);
+  void SetZerkLimits(const Eigen::VectorXd& velLimits);
+  void RemoveZerkLimits();
+  double GetZerkLimits(unsigned int index);
 
-	void SetAccelLimits(const Vector & velLimits);
-	void RemoveAccelLimits(void);
-	double GetAccelLimits(unsigned int index);
+  void SetAccelLimits(const Eigen::VectorXd& velLimits);
+  void RemoveAccelLimits();
+  double GetAccelLimits(unsigned int index);
 
-	void SetVelocityLimits(const Vector & velLimits);
-	void RemoveVelocityLimits(void);
-	double GetVelocityLimits(unsigned int index);
+  void SetVelocityLimits(const Eigen::VectorXd& velLimits);
+  void RemoveVelocityLimits();
+  double GetVelocityLimits(unsigned int index);
 
-	void SetPositionLimits(const Vector & posLimitsUp, const Vector & posLimitsDn);
-	void RemovePositionLimits(void);
+  void SetPositionLimits(const Eigen::VectorXd& posLimitsUp, const Eigen::VectorXd& posLimitsDn);
+  void RemovePositionLimits();
 
-	void GetTarget(Vector & target);
+  void GetTarget(Eigen::VectorXd& target);
 
-	void GetState(Vector & Position);
-	void GetState(Vector & Position, Vector & Velocity);
-	void GetStateAccel(Vector & Accel);
+  void GetState(Eigen::VectorXd& Position);
+  void GetState(Eigen::VectorXd& Position, Eigen::VectorXd& Velocity);
+  void GetStateAccel(Eigen::VectorXd& Accel);
 
-	void Update();
-	void Update(double dt);
+  void Update();
+  void Update(double dt);
 
-	double GetReachingTime(void);
+  double GetReachingTime();
 };
-
-#endif /* MZDYNAMICS_H_ */
+}// namespace fast_gmm

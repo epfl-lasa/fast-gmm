@@ -1,73 +1,68 @@
+#include "fast_gmm/SVR.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <fstream>
 
-#include "fast_gmm/SVR.h"
+namespace fast_gmm {
 
-SVR::SVR(char *f_svrmodel)
-{
-	unsigned int i,s;
-	ifstream fin(f_svrmodel);
-	
-	// Load SVR Model
-	fin >> SVRModel.kernelType
-	    >> SVRModel.nbDim     
-	    >> SVRModel.totalSV   
-	    >> SVRModel.gamma     
-	    >> SVRModel.b;
+SVR::SVR(char* f_svrmodel) {
+  unsigned int i, s;
+  std::ifstream fin(f_svrmodel);
 
-	SVRModel.SVs   = zeros<mat>(SVRModel.nbDim, SVRModel.totalSV);
-	SVRModel.alpha = zeros<colvec>(SVRModel.totalSV);
+  // Load SVR Model
+  fin >> SVRModel.kernelType >> SVRModel.nbDim >> SVRModel.totalSV >> SVRModel.gamma >> SVRModel.b;
 
-	for( s=0; s<SVRModel.totalSV; s++ ){
-		fin >> SVRModel.alpha(s);
-	}
+  SVRModel.SVs = Eigen::MatrixXd::Zero(SVRModel.nbDim, SVRModel.totalSV);
+  SVRModel.alpha = Eigen::VectorXd::Zero(SVRModel.totalSV);
 
-	for( i=0; i<SVRModel.nbDim; i++ ){
-		for( s=0; s<SVRModel.totalSV; s++ ){		
-			fin >> SVRModel.SVs(i,s);
-		}
-	}
-	fin >> SVRModel.mux;
-	fin.close();
+  for (s = 0; s < SVRModel.totalSV; s++) {
+    fin >> SVRModel.alpha(s);
+  }
 
-	diffx = zeros<vec>(SVRModel.nbDim);
+  for (i = 0; i < SVRModel.nbDim; i++) {
+    for (s = 0; s < SVRModel.totalSV; s++) {
+      fin >> SVRModel.SVs(i, s);
+    }
+  }
+  fin >> SVRModel.mux;
+  fin.close();
+
+  diffx = Eigen::VectorXd(SVRModel.nbDim);
 }
 
-double SVR::regression(vec xi)
-{
-	double out;
-	unsigned int d,s;
-	double k;
+double SVR::regression(const Eigen::VectorXd& xi) {
+  double out;
+  unsigned int d, s;
+  double k;
 
-	out=0.0;
-	
-	// Kernel type
-	//"	0 -- linear: u'*v\n"
-	//"	1 -- polynomial: (gamma*u'*v + coef0)^degree\n"
-	//"	2 -- radial basis function: exp(-gamma*|u-v|^2)\n"
-	//"	3 -- sigmoid: tanh(gamma*u'*v + coef0)\n"
-	//"	4 -- precomputed kernel (kernel values in training_instance_matrix)\n"
+  out = 0.0;
 
-	// RBF kernel
-	if(SVRModel.kernelType == 2){
+  // Kernel type
+  //"	0 -- linear: u'*v\n"
+  //"	1 -- polynomial: (gamma*u'*v + coef0)^degree\n"
+  //"	2 -- radial basis function: exp(-gamma*|u-v|^2)\n"
+  //"	3 -- sigmoid: tanh(gamma*u'*v + coef0)\n"
+  //"	4 -- precomputed kernel (kernel values in training_instance_matrix)\n"
 
-		for( s=0; s<SVRModel.totalSV; s++ ){
-			for(d=0; d<SVRModel.nbDim; d++) diffx(d) = xi(d)-SVRModel.SVs(d,s);
+  // RBF kernel
+  if (SVRModel.kernelType == 2) {
 
-			k = exp(-SVRModel.gamma*dot(diffx,diffx));
-			out += SVRModel.alpha(s)*k;
-		}
+    for (s = 0; s < SVRModel.totalSV; s++) {
+      for (d = 0; d < SVRModel.nbDim; d++) diffx(d) = xi(d) - SVRModel.SVs(d, s);
 
-	}
-	// Polynomial kernel
-	else if(SVRModel.kernelType = 1){
-		//not implemented yet
-	}
-	
-	return (out - SVRModel.b)*SVRModel.mux;
+      k = exp(-SVRModel.gamma * diffx.dot(diffx));
+      out += SVRModel.alpha(s) * k;
+    }
+
+  }
+    // Polynomial kernel
+  else if (SVRModel.kernelType == 1) {
+    //not implemented yet
+  }
+
+  return (out - SVRModel.b) * SVRModel.mux;
 }
 
 
@@ -87,3 +82,4 @@ double SVR::regression(vec xi)
 //	
 //	return (outr - SVRModel.b)*SVRModel.mux;
 //}
+}// namespace fast_gmm

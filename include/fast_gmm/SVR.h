@@ -1,34 +1,28 @@
-#ifndef __SVR_H__
-#define __SVR_H__
+#pragma once
 
-#include "armadillo"
+#include <eigen3/Eigen/Core>
 
-using namespace arma;
-using namespace std;
+namespace fast_gmm {
 
-
-struct SVRModels{
-	unsigned int kernelType;
-	unsigned int nbDim;
-	unsigned int totalSV;
-	double gamma;
-	double b;
-	mat SVs;  // nbDim X totalSV
-	vec alpha; // 1 X totalSV
-	double mux;
+struct SVRModels {
+  unsigned int kernelType;
+  unsigned int nbDim;
+  unsigned int totalSV;
+  double gamma;
+  double b;
+  Eigen::MatrixXd SVs;  // nbDim X totalSV
+  Eigen::VectorXd alpha; // 1 X totalSV
+  double mux;
 };
 
 // SVR
-class SVR
-{
+class SVR {
 private:
-	SVRModels SVRModel;
+  SVRModels SVRModel;
 
-	vec diffx;
+  Eigen::VectorXd diffx;
 public:
-	SVR(char *f_svrmodel);	
-	double regression(vec xi);	
+  SVR(char* f_svrmodel);
+  double regression(const Eigen::VectorXd& xi);
 };
-
-
-#endif //__SVR_H__
+}// namespace fast_gmm

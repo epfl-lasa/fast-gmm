@@ -6,78 +6,70 @@
  *      Author: Seungsu KIM
  */
 
-#ifndef CDDYNAMICS_H_
-#define CDDYNAMICS_H_
+#pragma once
 
+#include <eigen3/Eigen/Core>
 
-#include "MathLib.h"
+namespace fast_gmm {
 
-#ifdef USE_MATHLIB_NAMESPACE
-using namespace MathLib;
-#endif
-
-class CDDynamics
-{
+class CDDynamics {
 private :
-	Vector mTarget;
-	Vector mTargetVelocity;
+  Eigen::VectorXd mTarget;
+  Eigen::VectorXd mTargetVelocity;
 
-	Vector mState;
-	Vector mStateVelocity;
-	Vector mStateAccel;
+  Eigen::VectorXd mState;
+  Eigen::VectorXd mStateVelocity;
+  Eigen::VectorXd mStateAccel;
 
-	Vector mPositionLimits;
-	Vector mVelocityLimits;
-	Vector mAccelLimits;
+  Eigen::VectorXd mPositionLimits;
+  Eigen::VectorXd mVelocityLimits;
+  Eigen::VectorXd mAccelLimits;
 
-	unsigned int mDim;
-	double mWn;
-	double mDT;
+  int mDim;
+  double mWn;
+  double mDT;
 
-	double mReachingTime;
+  double mReachingTime;
 
 public :
 
-	CDDynamics(int dim, double dt, double Wn);
+  CDDynamics(int dim, double dt, double Wn);
 
-	void SetState(const Vector & Position);
-	void SetState(const Vector & Position, const Vector & Velocity);
-	void SetTarget(const Vector & target);
-	void SetTarget(double target[]);
-	void SetTarget(const Vector & target, double ReachingTime);
-	void SetStateTarget(const Vector & Position, const Vector & Target);
-	//void SetTarget(const Vector & target, const Vector & targetVel);
+  void SetState(const Eigen::VectorXd& Position);
+  void SetState(const Eigen::VectorXd& Position, const Eigen::VectorXd& Velocity);
+  void SetTarget(const Eigen::VectorXd& target);
+  void SetTarget(const double target[]);
+  void SetTarget(const Eigen::VectorXd& target, double ReachingTime);
+  void SetStateTarget(const Eigen::VectorXd& Position, const Eigen::VectorXd& Target);
+//  void SetTarget(const Eigen::VectorXd& target, const Eigen::VectorXd& targetVel);
 
-	void SetDt(double dt);
-	void SetWn(double Wn);
+  void SetDt(double dt);
+  void SetWn(double Wn);
 
-	void SetAccelLimits(const Vector & velLimits);
-	void RemoveAccelLimits(void);
-	double GetAccelLimits(unsigned int index);
+  void SetAccelLimits(const Eigen::VectorXd& velLimits);
+  void RemoveAccelLimits(void);
+  double GetAccelLimits(int index);
 
-	void SetVelocityLimits(const Vector & velLimits);
-	void RemoveVelocityLimits(void);
-	double GetVelocityLimits(unsigned int index);
+  void SetVelocityLimits(const Eigen::VectorXd& velLimits);
+  void RemoveVelocityLimits();
+  double GetVelocityLimits(int index);
 
-	void SetPositionLimits(const Vector & posLimits);
-	void RemovePositionLimits(void);
+  void SetPositionLimits(const Eigen::VectorXd& posLimits);
+  void RemovePositionLimits();
 
+  void GetTarget(Eigen::VectorXd& target);
+  //void GetTarget(Eigen::VectorXd& target, Eigen::VectorXd& targetVel);
 
-	void GetTarget(Vector & target);
-	//void GetTarget(Vector & target, Vector & targetVel);
+  void GetState(Eigen::VectorXd& Position);
+  void GetState(double* Position);
+  void GetState(Eigen::VectorXd& Position, Eigen::VectorXd& Velocity);
+  void GetStateAccel(Eigen::VectorXd& Accel);
 
-	void GetState(Vector & Position);
-	void GetState(double *Position);
-	void GetState(Vector & Position, Vector & Velocity);
-	void GetStateAccel(Vector & Accel);
+  void Update();
+  void Update(double dt);
+  void Update(double dt, double muxVel);
 
-	void Update();
-	void Update(double dt);
-	void Update(double dt, double muxVel);
-
-	double GetReachingTime(double dt, double muxVel);
-	double GetTargetTime(void);
+  double GetReachingTime(double dt, double muxVel);
+  double GetTargetTime() const;
 };
-
-
-#endif /* CDDYNAMICS_H_ */
+}// namespace fast_gmm

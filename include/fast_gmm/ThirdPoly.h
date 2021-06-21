@@ -5,29 +5,31 @@
  *      Author: seungsu
  */
 
-#ifndef THIRDPOLY_H_
-#define THIRDPOLY_H_
+#pragma once
 
-#include "MathLib.h"
+#include <eigen3/Eigen/Core>
 
-class ThirdPoly
-{
+namespace fast_gmm {
+
+class ThirdPoly {
 private :
-	int mDim;
+  int mDim;
 
-	MathLib::Vector mParamA, mParamB, mParamC, mParamD;
+  Eigen::VectorXd mParamA, mParamB, mParamC, mParamD;
 
-	MathLib::Vector mInitPos, mInitVel;
-	MathLib::Vector mEndPos, mEndVel;
-	double mDuration;
+  Eigen::VectorXd mInitPos, mInitVel;
+  Eigen::VectorXd mEndPos, mEndVel;
+  double mDuration;
 public :
-	ThirdPoly(int dim);
+  ThirdPoly(int dim);
 
-	void SetConstraints(MathLib::Vector &initPos, MathLib::Vector &initVel, MathLib::Vector &endPos, MathLib::Vector &endVel, double duration);
+  void SetConstraints(Eigen::VectorXd& initPos,
+                      Eigen::VectorXd& initVel,
+                      Eigen::VectorXd& endPos,
+                      Eigen::VectorXd& endVel,
+                      double duration);
 
-	void Get(double t, MathLib::Vector &pos);
-	void Get(double t, MathLib::Vector &pos, MathLib::Vector &vel);
+  void Get(double t, Eigen::VectorXd& pos);
+  void Get(double t, Eigen::VectorXd& pos, Eigen::VectorXd& vel);
 };
-
-
-#endif /* THIRDPOLY_H_ */
+}

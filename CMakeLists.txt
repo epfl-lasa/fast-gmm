@@ -19,7 +19,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
  add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-find_library(mathlib REQUIRED)
+find_package(Eigen3 REQUIRED)
+include_directories(${Eigen3_INCLUDE_DIRS})
 
 if(BUILD_TESTING)
  enable_testing()
@@ -47,10 +48,6 @@ add_library(${PROJECT_NAME} SHARED
   ${CORE_SOURCES}
 )
 
-target_link_libraries(${PROJECT_NAME}
-  armadillo
-)
-
 install(DIRECTORY include/
   DESTINATION include
 )
@@ -66,7 +63,6 @@ if (BUILD_TESTING)
  target_link_libraries(${PROJECT_NAME}_test
    ${PROJECT_NAME}
    ${GTEST_LIBRARIES}
-   mathlib
    pthread
  )
  add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME}_test)

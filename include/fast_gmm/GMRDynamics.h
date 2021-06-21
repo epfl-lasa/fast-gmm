@@ -5,10 +5,12 @@
  *      Author: Seungsu KIM
  */
 
-#ifndef __GMRDYNAMICS_H__
-#define __GMRDYNAMICS_H__
+#pragma once
 
+#include <vector>
 #include "fast_gmm/Gaussians.h"
+
+namespace fast_gmm {
 
 #define GMR_ERROR_TOLERANCE 0.001
 #define INTEGRATION_L 5
@@ -16,41 +18,41 @@
 #define REAL_MIN (1e-30)
 
 // GMR Dynamics
-class GMRDynamics
-{
+class GMRDynamics {
 private:
-	Gaussians *GMM;
+  Gaussians* GMM;
 
-	double delta_t;
-	double target_t;
-	double current_t;
+  double delta_t;
+  double target_t;
+  double current_t;
 
-	Vector gXi;
-	Vector target;
-	unsigned int gDim;
+  Eigen::VectorXd gXi;
+  Eigen::VectorXd target;
+  unsigned int gDim;
 
 public:
-	GMRDynamics(int nStates, int nVar, double delta_t, const char *f_mu, const char *f_sigma, const char *f_prio );
-	GMRDynamics(int nStates, int nVar, double delta_t, const vector<double> pri_vec, const vector<double> mu_vec, const vector<double> sig_vec);
+  GMRDynamics(int nStates,
+              int nVar,
+              double delta_t,
+              const std::vector<double> pri_vec,
+              const std::vector<double> mu_vec,
+              const std::vector<double> sig_vec);
 
-	void initGMR(int first_inindex, int last_inindex, int first_outindex, int last_outindex);
+  void initGMR(int first_inindex, int last_inindex, int first_outindex, int last_outindex);
 
-	void   setStateTarget(Vector state, Vector target);
-	void   setTarget(Vector target, double target_t = -1.0);
-	Vector getTarget(void);
-	double getTargetT(void);
-	void   setState(Vector state);
-	Vector getState(void);
-	void   setCurrentTime(double current_t);
-	double getCurrentTime(void);
+  void setStateTarget(const Eigen::VectorXd& state, const Eigen::VectorXd& input_target);
+  void setTarget(const Eigen::VectorXd& input_target, double input_target_t = -1.0);
+  Eigen::VectorXd getTarget();
+  double getTargetT();
+  void setState(const Eigen::VectorXd& state);
+  Eigen::VectorXd getState();
+  void setCurrentTime(double current_t);
+  double getCurrentTime();
 
-	Vector getVelocity(Vector x);
+  Eigen::VectorXd getVelocity(const Eigen::VectorXd& x);
 
-	Vector getNextState(void);
-	Vector getNextState(double lamda);
-	double getReachingTime(double lamda);
+  Eigen::VectorXd getNextState();
+  Eigen::VectorXd getNextState(double lamda);
+  double getReachingTime(double lamda);
 };
-
-
-
-#endif //__GMRDYNAMICS_H__
+}// namespace fast_gmm

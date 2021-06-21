@@ -5,76 +5,74 @@
  *      Author: Seungsu KIM
  */
 
-#ifndef __GAUSSIANSM_H__
-#define __GAUSSIANSM_H__
+#pragma once
 
-#include "MathLib.h"
+#include <eigen3/Eigen/Core>
+
+namespace fast_gmm {
 
 #define GAUSSIAN_MAXIMUM_NUMBER 50
 
-using namespace MathLib;
-
 struct GMMState {
-	Vector Mu;
-	Matrix Sigma;
-	double Prio;
+  Eigen::VectorXd Mu;
+  Eigen::MatrixXd Sigma;
+  double Prior;
 };
 
 struct GMMStateP {
-	Vector MuI;
-	Matrix SigmaII;
-	Matrix SigmaIIInv;
-	double detSigmaII;
+  Eigen::VectorXd MuI;
+  Eigen::MatrixXd SigmaII;
+  Eigen::MatrixXd SigmaIIInv;
+  double detSigmaII;
 
-	// for GMR
-	Vector muO;
-	Matrix SigmaIO;
-	Matrix SigmaIOInv;
+  // for GMR
+  Eigen::VectorXd muO;
+  Eigen::MatrixXd SigmaIO;
+  Eigen::MatrixXd SigmaIOInv;
 };
 
 struct GMMs {
-	unsigned int nbStates;
-	unsigned int nbDim;
+  unsigned int nbStates;
+  unsigned int nbDim;
 
-	GMMState  States[GAUSSIAN_MAXIMUM_NUMBER];
+  GMMState States[GAUSSIAN_MAXIMUM_NUMBER];
 };
 
-class Gaussians
-{
+class Gaussians {
 private:
-	GMMStateP gmmpinv[GAUSSIAN_MAXIMUM_NUMBER];
+  GMMStateP gmmpinv[GAUSSIAN_MAXIMUM_NUMBER];
 
 public:
-	GMMs model;
+  GMMs model;
 
-	Gaussians(const char *f_mu, const char *f_sigma, const char *f_prio);
-	Gaussians(int nbStates, int nbDim, const char *f_mu, const char *f_sigma, const char *f_prio);
-	Gaussians(const int nbStates, const int nbDim, const vector<double> pri_vec, const vector<double> mu_vec, const vector<double> sig_vec);
-	Gaussians(GMMs *model);
+  Gaussians(const int nbStates,
+            const int nbDim,
+            const std::vector<double> pri_vec,
+            const std::vector<double> mu_vec,
+            const std::vector<double> sig_vec);
+  Gaussians(GMMs* model);
 
-	void setGMMs(GMMs *model);
+  void setGMMs(GMMs* model);
 
-	// For fast computation of GaussianPDF
-	Vector gfDiff, gfDiffp;
-	Vector gDer;
-	Vector gPdf;
-	int nbDimI;
+  // For fast computation of GaussianPDF
+  Eigen::VectorXd gfDiff, gfDiffp;
+  Eigen::VectorXd gDer;
+  Eigen::VectorXd gPdf;
+  int nbDimI;
 
+  void InitFastGaussians(int first_inindex, int last_inindex);
+  double GaussianPDFFast(int state, Eigen::VectorXd x);
+  double GaussianProbFast(const Eigen::VectorXd& x);
+  Eigen::VectorXd GaussianDerProbFast(const Eigen::VectorXd& x);
 
-	void InitFastGaussians(int first_inindex, int last_inindex);
-	double GaussianPDFFast(int state, Vector x);
-	double GaussianProbFast(Vector x);
-	Vector GaussianDerProbFast(Vector x);
-
-	void InitFastGMR(int first_inindex, int last_inindex, int first_outindex, int last_outindex);
-	void Regression(const Vector & indata, Vector & outdata, Matrix & derGMR);
-	void Regression(const Vector & indata, Vector & outdata);
-	Vector Regression(const Vector & indata);
+  void InitFastGMR(int first_inindex, int last_inindex, int first_outindex, int last_outindex);
+  void Regression(const Eigen::VectorXd& indata, Eigen::VectorXd& outdata, Eigen::MatrixXd& derGMR);
+  void Regression(const Eigen::VectorXd& indata, Eigen::VectorXd& outdata);
+  Eigen::VectorXd Regression(const Eigen::VectorXd& indata);
 
 };
 /*
 void GaussianMux(GMMs *modelK, GMMs *modelL, GMMs *modelOut);
 void GaussianRotate(GMMs *model, Vector P, Matrix R, GMMs *modelOut);
 */
-
-#endif //__GAUSSIANS_H__
+}// namespace fast_gmm

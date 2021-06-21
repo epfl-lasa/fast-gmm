@@ -5,13 +5,12 @@
  *      Author: Seungsu KIM
  */
 
-#include <math.h>
-#include <iostream>
-#include <fstream>
-
 #include "fast_gmm/Gaussians.h"
 
-using namespace std;
+#include <cmath>
+#include <iostream>
+
+namespace fast_gmm {
 /*
 Gaussians::Gaussians(GMMs *model)
 {
@@ -27,307 +26,207 @@ Gaussians::Gaussians(GMMs *model)
 	}
 }
 */
+Gaussians::Gaussians(const int nbStates,
+                     const int nbDim,
+                     const std::vector<double> pri_vec,
+                     const std::vector<double> mu_vec,
+                     const std::vector<double> sig_vec) {
 
-Gaussians::Gaussians(const char *f_mu, const char *f_sigma, const char *f_prio)
-{
-	int s, i, j;
-	int nbStates;
-	int nbDim;
+  model.nbStates = nbStates;
+  model.nbDim = nbDim;
 
-	Matrix fMatrix;
-	fMatrix.Load(f_prio);
-	if ( fMatrix(0, fMatrix.ColumnSize() - 1) > 0.0 )
-	{
-		nbStates = fMatrix.ColumnSize();
-	}
-	else
-	{
-		nbStates = fMatrix.ColumnSize() - 1;
-	}
+  for (int s = 0; s < nbStates; s++) {
+    model.States[s].Mu.resize(nbDim);
+    model.States[s].Sigma.resize(nbDim, nbDim);
+  }
 
-	for ( s = 0; s < nbStates; s++ ) {
-		model.States[s].Prio = fMatrix(0, s);
-	}
+  for (int s = 0; s < nbStates; s++) {
+    model.States[s].Prior = pri_vec[s];
+  }
+  // cout << endl << "Printing the constructed Priors" << endl;
+  // for ( int s = 0; s < nbStates; s++ ) {
+  // 	cout << model.States[s].Prio  << "\t";
+  // }
+  // cout << endl;
 
-	fMatrix.Load(f_mu);
-	nbDim = fMatrix.RowSize();
-	model.nbStates = nbStates;
-	model.nbDim    = nbDim;
+  for (int s = 0; s < nbStates; s++) {
+    for (int d = 0; d < nbDim; d++) {
+      model.States[s].Mu[d] = mu_vec[s * nbDim + d];
+    }
+  }
 
+  // cout << endl << "Printing the constructed Mu" << endl;
+  // for ( int s = 0; s < nbStates; s++ ) {
+  // 	for (int d = 0; d < nbDim; d++) {
+  // 		cout << model.States[s].Mu[d]  << "\t";
+  // 	}
+  // 	cout << endl;
+  // }
 
-	for ( s = 0; s < nbStates; s++ ) {
-		model.States[s].Mu.Resize(nbDim);
-		model.States[s].Sigma.Resize(nbDim, nbDim );
-	}
+  for (int s = 0; s < nbStates; s++) {
+    for (int row = 0; row < nbDim; row++) {
+      for (int col = 0; col < nbDim; col++) {
+        int ind = s * nbDim * nbDim + row * nbDim + col;
+        model.States[s].Sigma(row, col) = sig_vec[ind];
+      }
+    }
+  }
 
-	for ( s = 0; s < nbStates; s++ ) {
-		model.States[s].Mu = fMatrix.GetColumn(s);
-	}
-
-	fMatrix.Load(f_sigma);
-	j = 0;
-	for ( s = 0; s < nbStates; s++ ) {
-		for ( i = 0; i < nbDim; i++ ) {
-			model.States[s].Sigma.SetRow(fMatrix.GetRow(j), i);
-			j++;
-		}
-	}
+  // cout << endl << "Printing the constructed Sigma" << endl;
+  // for ( int s = 0; s < nbStates; s++ ) {
+  // 	for (int row = 0; row < nbDim; row++) {
+  // 		for (int col = 0; col < nbDim; col++) {
+  // 			cout << model.States[s].Sigma(row, col) << "\t";
+  // 		}
+  // 		cout <<endl;
+  // 	}
+  // 	cout << endl;
+  // }
 }
 
-Gaussians::Gaussians(int nbStates, int nbDim, const char *f_mu, const char *f_sigma, const char *f_prio)
-{
-
-	int s, i, j;
-
-	model.nbStates = nbStates;
-	model.nbDim    = nbDim;
-
-	for ( s = 0; s < nbStates; s++ ) {
-		model.States[s].Mu.Resize(nbDim);
-		model.States[s].Sigma.Resize(nbDim, nbDim );
-	}
-
-	Matrix fMatrix(nbDim, nbStates);
-	fMatrix.Load(f_mu);
-	for ( s = 0; s < nbStates; s++ ) {
-		model.States[s].Mu = fMatrix.GetColumn(s);
-	}
-
-	fMatrix.Resize(nbStates * nbDim, nbDim);
-	fMatrix.Load(f_sigma);
-	j = 0;
-	for ( s = 0; s < nbStates; s++ ) {
-		for ( i = 0; i < nbDim; i++ ) {
-			model.States[s].Sigma.SetRow(fMatrix.GetRow(j), i);
-			j++;
-		}
-	}
-
-	fMatrix.Resize(1, nbStates);
-	fMatrix.Load(f_prio);
-	Vector fVector(nbStates);
-	for ( s = 0; s < nbStates; s++ ) {
-		model.States[s].Prio = fMatrix(0, s);
-	}
-
+void Gaussians::setGMMs(GMMs* model) {
+  for (unsigned int s = 0; s < model->nbStates; s++) {
+    this->model.States[s].Mu = model->States[s].Mu;
+    this->model.States[s].Sigma = model->States[s].Sigma;
+    this->model.States[s].Prior = model->States[s].Prior;
+  }
 }
 
-Gaussians::Gaussians(const int nbStates, const int nbDim, const vector<double> pri_vec, const vector<double> mu_vec, const vector<double> sig_vec) {
+void Gaussians::InitFastGaussians(int first_inindex, int last_inindex) {
+  double det;
+  int nbIN = last_inindex - first_inindex + 1;
 
-	model.nbStates = nbStates;
-	model.nbDim    = nbDim;
+  for (unsigned int s = 0; s < model.nbStates; s++) {
+    gmmpinv[s].MuI.resize(nbIN);
+    gmmpinv[s].SigmaII.resize(nbIN, nbIN);
+    gmmpinv[s].SigmaIIInv.resize(nbIN, nbIN);
+  }
 
-	for ( int s = 0; s < nbStates; s++ ) {
-		model.States[s].Mu.Resize(nbDim);
-		model.States[s].Sigma.Resize(nbDim, nbDim );
-	}
+  for (unsigned int s = 0; s < model.nbStates; s++) {
+    for (int i = first_inindex; i <= last_inindex; i++) { gmmpinv[s].MuI(i - first_inindex) = model.States[s].Mu(i); }
+    for (int i = first_inindex; i <= last_inindex; i++) {
+      for (int j = first_inindex; j <= last_inindex; j++) {
+        gmmpinv[s].SigmaII(i - first_inindex, j - first_inindex) = model.States[s].Sigma(i, j);
+      }
+    }
 
-	for ( int s = 0; s < nbStates; s++ ) {
-		model.States[s].Prio = pri_vec[s];
-	}
-	// cout << endl << "Printing the constructed Priors" << endl;
-	// for ( int s = 0; s < nbStates; s++ ) {
-	// 	cout << model.States[s].Prio  << "\t";
-	// }
-	// cout << endl;
+    gmmpinv[s].SigmaIIInv = gmmpinv[s].SigmaII.inverse();
+    double det = gmmpinv[s].SigmaIIInv.determinant();
+    if (det < 0) { det = 1e-30; }
+    gmmpinv[s].detSigmaII = det;
+  }
 
-
-	for ( int s = 0; s < nbStates; s++ ) {
-		for (int d = 0; d < nbDim; d++) {
-			model.States[s].Mu[d] = mu_vec[s * nbDim + d];
-		}
-	}
-
-
-	// cout << endl << "Printing the constructed Mu" << endl;
-	// for ( int s = 0; s < nbStates; s++ ) {
-	// 	for (int d = 0; d < nbDim; d++) {
-	// 		cout << model.States[s].Mu[d]  << "\t";
-	// 	}
-	// 	cout << endl;
-	// }
-
-	for ( int s = 0; s < nbStates; s++ ) {
-		for (int row = 0; row < nbDim; row++) {
-			for (int col = 0; col < nbDim; col++) {
-				int ind = s * nbDim * nbDim + row * nbDim + col;
-				model.States[s].Sigma(row, col) = sig_vec[ind];
-			}
-		}
-	}
-
-
-	// cout << endl << "Printing the constructed Sigma" << endl;
-	// for ( int s = 0; s < nbStates; s++ ) {
-	// 	for (int row = 0; row < nbDim; row++) {
-	// 		for (int col = 0; col < nbDim; col++) {
-	// 			cout << model.States[s].Sigma(row, col) << "\t";
-	// 		}
-	// 		cout <<endl;
-	// 	}
-	// 	cout << endl;
-	// }
-
-
-
+  nbDimI = last_inindex - first_inindex + 1;
+  gfDiff.resize(nbDimI);
+  gfDiffp.resize(nbDimI);
+  gDer.resize(nbDimI);
 
 }
 
+double Gaussians::GaussianPDFFast(int state, Eigen::VectorXd x) {
+  double p;
+  gfDiff = x - gmmpinv[state].MuI;
+  gfDiffp = gmmpinv[state].SigmaIIInv * gfDiff;
 
+  p = exp(-0.5 * gfDiff.dot(gfDiffp)) / sqrt(pow(2.0 * M_PI, nbDimI) * (gmmpinv[state].detSigmaII + 1e-30));
 
-
-void Gaussians::setGMMs(GMMs *model)
-{
-	for (unsigned int s = 0; s < model->nbStates; s++ ) {
-		this->model.States[s].Mu    = model->States[s].Mu;
-		this->model.States[s].Sigma = model->States[s].Sigma;
-		this->model.States[s].Prio  = model->States[s].Prio;
-	}
+  return p;
 }
 
-
-void Gaussians::InitFastGaussians(int first_inindex, int last_inindex)
-{
-	double det;
-	int nbIN = last_inindex - first_inindex + 1;
-
-	for (unsigned int s = 0; s < model.nbStates; s++ ) {
-		gmmpinv[s].MuI.Resize(nbIN);
-		gmmpinv[s].SigmaII.Resize(nbIN, nbIN);
-		gmmpinv[s].SigmaIIInv.Resize(nbIN, nbIN);
-	}
-
-	for (unsigned int s = 0; s < model.nbStates; s++ ) {
-		for ( int i = first_inindex; i <= last_inindex; i++ ) gmmpinv[s].MuI(i - first_inindex) = model.States[s].Mu(i);
-		for ( int i = first_inindex; i <= last_inindex; i++ )
-			for ( int j = first_inindex; j <= last_inindex; j++ )
-				gmmpinv[s].SigmaII(i - first_inindex, j - first_inindex) = model.States[s].Sigma(i, j);
-
-		gmmpinv[s].SigmaII.Inverse(gmmpinv[s].SigmaIIInv, &det);
-		//gmmpinv[s].SigmaIIInv = gmmpinv[s].SigmaII.Inverse();
-		//gmmpinv[s].SigmaII.Inverse(&det);
-		if (det < 0) det = 1e-30;
-		gmmpinv[s].detSigmaII = det;
-
-	}
-
-	nbDimI = last_inindex - first_inindex + 1;
-	gfDiff.Resize(nbDimI);
-	gfDiffp.Resize(nbDimI);
-	gDer.Resize(nbDimI);
-
+double Gaussians::GaussianProbFast(const Eigen::VectorXd& x) {
+  double totalP = 0;
+  for (unsigned int s = 0; s < model.nbStates; s++) {
+    totalP += model.States[s].Prior * GaussianPDFFast(s, x);
+  }
+  return totalP;
 }
 
-double Gaussians::GaussianPDFFast(int state, Vector x)
-{
-	double p;
-	gfDiff  = x - gmmpinv[state].MuI;
-	gfDiffp = gmmpinv[state].SigmaIIInv * gfDiff;
-
-	p = exp(-0.5 * gfDiff.Dot(gfDiffp)) / sqrt(pow(2.0 * PI, nbDimI) * ( gmmpinv[state].detSigmaII + 1e-30));
-
-	return p;
+Eigen::VectorXd Gaussians::GaussianDerProbFast(const Eigen::VectorXd& x) {
+  gDer.setZero();
+  for (unsigned int s = 0; s < model.nbStates; s++) {
+    gDer += (gmmpinv[s].SigmaIIInv * (x - gmmpinv[s].MuI)) * model.States[s].Prior * GaussianPDFFast(s, x);
+  }
+  return -gDer;
 }
 
-double Gaussians::GaussianProbFast(Vector x)
-{
-	double totalP = 0;
-	for (unsigned int s = 0; s < model.nbStates; s++ ) {
-		totalP += model.States[s].Prio * GaussianPDFFast(s, x);
-	}
-	return totalP;
-}
+void Gaussians::InitFastGMR(int first_inindex, int last_inindex, int first_outindex, int last_outindex) {
+  double det;
+  int nbIN = last_inindex - first_inindex + 1;
+  int nbOUT = last_outindex - first_outindex + 1;
 
-Vector Gaussians::GaussianDerProbFast(Vector x)
-{
-	gDer.Zero();
-	for (unsigned int s = 0; s < model.nbStates; s++ ) {
-		gDer += (gmmpinv[s].SigmaIIInv * (x - gmmpinv[s].MuI)) * model.States[s].Prio * GaussianPDFFast(s, x);
-	}
-	return -gDer;
-}
+  gPdf.resize(model.nbStates);
 
-void Gaussians::InitFastGMR(int first_inindex, int last_inindex, int first_outindex, int last_outindex)
-{
-	double det;
-	int nbIN  = last_inindex - first_inindex + 1;
-	int nbOUT = last_outindex - first_outindex + 1;
+  for (unsigned int s = 0; s < model.nbStates; s++) {
+    gmmpinv[s].MuI.resize(nbIN);
+    gmmpinv[s].SigmaII.resize(nbIN, nbIN);
+    gmmpinv[s].SigmaIIInv.resize(nbIN, nbIN);
 
-	gPdf.Resize(model.nbStates);
+    gmmpinv[s].muO.resize(nbOUT);
+    gmmpinv[s].SigmaIO.resize(nbIN, nbOUT);
+    gmmpinv[s].SigmaIOInv.resize(nbOUT, nbOUT);
+  }
 
-	for (unsigned int s = 0; s < model.nbStates; s++ ) {
-		gmmpinv[s].MuI.Resize(nbIN);
-		gmmpinv[s].SigmaII.Resize(nbIN, nbIN);
-		gmmpinv[s].SigmaIIInv.Resize(nbIN, nbIN);
+  for (unsigned int s = 0; s < model.nbStates; s++) {
+    for (int i = first_inindex; i <= last_inindex; i++) {
+      gmmpinv[s].MuI(i - first_inindex) = model.States[s].Mu(i);
 
-		gmmpinv[s].muO.Resize(nbOUT);
-		gmmpinv[s].SigmaIO.Resize(nbIN, nbOUT);
-		gmmpinv[s].SigmaIOInv.Resize(nbOUT, nbOUT);
-	}
+      for (int j = first_inindex; j <= last_inindex; j++) {
+        gmmpinv[s].SigmaII(i - first_inindex, j - first_inindex) = model.States[s].Sigma(i, j);
+      }
+      for (int j = first_outindex; j <= last_outindex; j++) {
+        gmmpinv[s].SigmaIO(i - first_inindex, j - first_outindex) = model.States[s].Sigma(i, j);
+      }
+    }
 
-	for (unsigned int s = 0; s < model.nbStates; s++ ) {
-		for ( int i = first_inindex; i <= last_inindex; i++ ) {
-			gmmpinv[s].MuI(i - first_inindex) = model.States[s].Mu(i);
+    for (int i = first_outindex; i <= last_outindex; i++) {
+      gmmpinv[s].muO(i - first_outindex) = model.States[s].Mu(i);
+    }
 
-			for ( int j = first_inindex; j <= last_inindex; j++ ) {
-				gmmpinv[s].SigmaII(i - first_inindex, j - first_inindex) = model.States[s].Sigma(i, j);
-			}
-			for ( int j = first_outindex; j <= last_outindex; j++ ) {
-				gmmpinv[s].SigmaIO(i - first_inindex, j - first_outindex) = model.States[s].Sigma(i, j);
-			}
-		}
+    gmmpinv[s].SigmaIIInv = gmmpinv[s].SigmaII.inverse();
+    det = gmmpinv[s].SigmaIIInv.determinant();
+    if (det < 0) { det = 1e-30; }
+    gmmpinv[s].detSigmaII = det;
+    gmmpinv[s].SigmaIOInv = gmmpinv[s].SigmaIO.transpose().inverse();
+  }
 
-		for ( int i = first_outindex; i <= last_outindex; i++ ) {
-			gmmpinv[s].muO(i - first_outindex) = model.States[s].Mu(i);
-		}
-
-		gmmpinv[s].SigmaII.Inverse(gmmpinv[s].SigmaIIInv, &det);
-		if (det < 0) det = 1e-30;
-		gmmpinv[s].detSigmaII = det;
-		(gmmpinv[s].SigmaIO).Transpose().Inverse(gmmpinv[s].SigmaIOInv, &det);
-	}
-
-	nbDimI = last_inindex - first_inindex + 1;
-	gfDiff.Resize(nbDimI);
-	gfDiffp.Resize(nbDimI);
-	gDer.Resize(nbDimI);
+  nbDimI = last_inindex - first_inindex + 1;
+  gfDiff.resize(nbDimI);
+  gfDiffp.resize(nbDimI);
+  gDer.resize(nbDimI);
 
 }
 
-void Gaussians::Regression(const Vector & indata, Vector & outdata, Matrix & derGMR)
-{
-	Regression(indata, outdata);
-	cout << "derivative is not implemented yet " << endl;
+void Gaussians::Regression(const Eigen::VectorXd& indata, Eigen::VectorXd& outdata, Eigen::MatrixXd& derGMR) {
+  Regression(indata, outdata);
+  std::cout << "derivative is not implemented yet " << std::endl;
 }
 
-void Gaussians::Regression(const Vector & indata, Vector & outdata)
-{
-	double pdfall;
-	Vector h(model.nbStates);
-	Vector r_diff(outdata.Size());
+void Gaussians::Regression(const Eigen::VectorXd& indata, Eigen::VectorXd& outdata) {
+  double pdfall;
+  Eigen::VectorXd h(model.nbStates);
+  Eigen::VectorXd r_diff(outdata.size());
 
-	for (unsigned int s = 0; s < model.nbStates; s++) {
-		gPdf(s) = model.States[s].Prio * GaussianPDFFast(s, indata);
-	}
-	pdfall = gPdf.Sum();
+  for (unsigned int s = 0; s < model.nbStates; s++) {
+    gPdf(s) = model.States[s].Prior * GaussianPDFFast(s, indata);
+  }
+  pdfall = gPdf.sum();
 
-	outdata.Zero();
-	for (unsigned int s = 0; s < model.nbStates; s++) {
-		//h(s) = gPdf(s)/(pdfall + 1e-30 );
-		h(s) = gPdf(s) / (pdfall );
-		r_diff = gmmpinv[s].SigmaIO.Transpose() * gmmpinv[s].SigmaIIInv * (indata - gmmpinv[s].MuI);
+  outdata.setZero();
+  for (unsigned int s = 0; s < model.nbStates; s++) {
+    //h(s) = gPdf(s)/(pdfall + 1e-30 );
+    h(s) = gPdf(s) / (pdfall);
+    r_diff = gmmpinv[s].SigmaIO.transpose() * gmmpinv[s].SigmaIIInv * (indata - gmmpinv[s].MuI);
 
-		for (unsigned int i = 0; i < r_diff.Size(); i++ ) {
-			outdata(i) += h(s) * (r_diff(i) + gmmpinv[s].muO(i));
-		}
-	}
+    for (unsigned int i = 0; i < r_diff.size(); i++) {
+      outdata(i) += h(s) * (r_diff(i) + gmmpinv[s].muO(i));
+    }
+  }
 }
 
-Vector Gaussians::Regression(const Vector & indata)
-{
-	Vector outdata(indata.Size());
-	Regression(indata, outdata);
-	return outdata;
+Eigen::VectorXd Gaussians::Regression(const Eigen::VectorXd& indata) {
+  Eigen::VectorXd outdata(indata.size());
+  Regression(indata, outdata);
+  return outdata;
 }
 
 
@@ -516,3 +415,4 @@ void GaussianRotate(GMMs *model, arma::vec P, arma::mat R, GMMs *modelOut)
 	//modelOut->nbStates = model->nbStates;
 }
 */
+}// namespace fast_gmm
