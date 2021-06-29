@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
 
 namespace fast_gmm {
 
